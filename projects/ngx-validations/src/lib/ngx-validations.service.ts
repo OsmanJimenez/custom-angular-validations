@@ -1,58 +1,58 @@
 import { Injectable } from '@angular/core';
 import { AbstractControl } from '@angular/forms';
+import validationsJson from './../assets/validations.json';
+
+interface ValidationPattern {
+  [key: string]: RegExp;
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class NgxValidationsService {
-  pattern = new RegExp('^[a-zA-ZñÑáéíóúÁÉÍÓÚs ]+$');
-  onlyLetters = new RegExp('^[a-zA-ZñÑáéíóúÁÉÍÓÚs ]+$');
-  onlyEmail = new RegExp(
-    '^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$'
-  );
-  onlyPassword = new RegExp(
-    '^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@,+()-.$!%*?&¡¿#"´`¨°¬\':;{}<=>\\\\~|^/_[\\]])[A-Za-z\\d@,+()-.$!¿%*?&¡#"´`¨°¬\':;{}<=>\\\\~|^/_[\\]]{6,}$'
-  );
-  onlyNumber = new RegExp(/^([0-9])*$/);
-  anyText = new RegExp(
-    '^[_A-Za-z0-9-ZñÑáéíóúÁÉÍÓÚs@,+()-.$≥!%*?&/¡¿#"´`¨°¬\':;{}<=> ]+$'
-  );
-  onlyNumbersText = new RegExp('^[A-Za-z0-9ZñÑáéíóúÁÉÍÓÚ]+$');
-  minOne = new RegExp(/^([1-9])*$/);
+  readonly patterns: ValidationPattern;
 
-  constructor() { }
+  constructor() {
+    const validationStrings: { [key: string]: string } = validationsJson;
+    this.patterns = Object.keys(validationStrings).reduce((acc, key) => {
+      acc[key] = new RegExp(validationStrings[key]);
+      return acc;
+    }, {} as ValidationPattern);
+  }
 
   Validation(min: number, max: number, option: string, requerid?: boolean) {
-    const pattern = {
-      onlyLetter: this.onlyLetters,
-      onlyEmail: this.onlyEmail,
-      onlyPassword: this.onlyPassword,
-      onlyNumber: this.onlyNumber,
-      minOne: this.minOne,
-      onlyNumbersText: this.onlyNumbersText,
-      anyText: this.anyText,
-    }[option];
+    return (control: AbstractControl): { [key: string]: any } | null => {
+      const selectedPattern = this.patterns[option];
 
-    return (control: AbstractControl): any | null => {
-      if (
-        requerid == false &&
-        control.value != null &&
-        control.value.length == 0
-      ) {
+      const value = control.value;
+      const isEmpty = value === null || value === '';
+
+      if (requerid === false && isEmpty) {
         return null;
-      } else if (control.value != null && control.value.length == 0) {
+      }
+
+      if (isEmpty) {
         return { nameRequerid: true };
-      } else if (!pattern) {
+      }
+
+      if (!selectedPattern) {
         return { invalidPattern: true };
-      } else if (!pattern.test(control.value)) {
+      }
+
+      if (!selectedPattern.test(value)) {
         return { [option]: true };
-      } else if (control.value != null && control.value.length <= min) {
+      }
+
+      if (value.length <= min) {
         return { nameNumberMin: true, min };
-      } else if (control.value != null && control.value.length >= max) {
+      }
+
+      if (value.length >= max) {
         return { nameNumberMax: true, max };
       }
 
       return null;
     };
   }
+
 }

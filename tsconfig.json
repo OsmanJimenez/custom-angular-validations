@@ -10,9 +10,7 @@
     "noFallthroughCasesInSwitch": true,
     "skipLibCheck": true,
     "paths": {
-      "ngx-validations": [
-        "./dist/ngx-validations"
-      ]
+      "ngx-validations": ["./dist/ngx-validations"]
     },
     "esModuleInterop": true,
     "sourceMap": true,
@@ -23,10 +21,8 @@
     "target": "ES2022",
     "module": "ES2022",
     "useDefineForClassFields": false,
-    "lib": [
-      "ES2022",
-      "dom"
-    ]
+    "lib": ["ES2022", "dom"],
+    "resolveJsonModule": true
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,
